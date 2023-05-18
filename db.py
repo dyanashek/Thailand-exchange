@@ -29,21 +29,5 @@ except Exception as ex:
     logging.error('Referrals table already exists.')
 
 
-# cursor.execute("DELETE FROM users WHERE id<>100")
-# database.commit()
-
-cursor.execute(f'''UPDATE referrals
-                    SET amount=1
-                    ''')
-
+cursor.execute("DELETE FROM referrals WHERE id<>1000")
 database.commit()
-
-# l = 'NULL'
-# cursor.execute(f'''
-#             INSERT INTO users (user_id, user_username, referral)
-#             VALUES ("4324235235", "dyanashek", "{None}")
-#             ''')
-
-# database.commit()
-
-# print(cursor.execute("SELECT referral FROM users WHERE user_id<>111").fetchall())
