@@ -49,7 +49,8 @@ def main_keyboard():
     keyboard.add(types.InlineKeyboardButton('💸 Калькулятор обмена', callback_data = 'calculate_main'))
     keyboard.add(types.InlineKeyboardButton('👨‍💻 Менеджер', url = f'https://t.me/{config.MANAGER_USERNAME}'))
     # reviews = types.InlineKeyboardButton('👍 Отзывы', callback_data = 'reviews')
-    faq = types.InlineKeyboardButton('💥 Услуги', callback_data = 'faq')
+    faq = types.InlineKeyboardButton('💥 Подробнее об услугах', callback_data = 'faq')
+    keyboard.add(types.InlineKeyboardButton('🏦 Перевод средств', callback_data = 'banks'))
     keyboard.add(faq) # reviews, 
     keyboard.add(types.InlineKeyboardButton('💎 Специальные предложения', callback_data = 'service'))
     return keyboard
@@ -77,7 +78,6 @@ def question_keyboard():
     keyboard.add(types.InlineKeyboardButton('🛬 Доставка в аэропорт', callback_data = 'airport'))
     keyboard.add(types.InlineKeyboardButton('🚚 Доставка курьером', callback_data = 'delivery'))
     keyboard.add(types.InlineKeyboardButton('🧾 Оплата услуг', callback_data = 'transfer'))
-    keyboard.add(types.InlineKeyboardButton('🏦 Перевод средств', callback_data = 'banks'))
     keyboard.add(types.InlineKeyboardButton('⬅️ Назад', callback_data = 'back_main'))
     return keyboard
 
@@ -125,7 +125,7 @@ def exchange_type_keyboard(currency):
     """Generates keyboard with exchange types."""
 
     keyboard = types.InlineKeyboardMarkup()
-    keyboard.add(types.InlineKeyboardButton('Курьер от 40 000 THB', callback_data = f'exchange_{currency}_delivery'))
+    keyboard.add(types.InlineKeyboardButton('Курьер (в зависимости от района)', callback_data = f'exchange_{currency}_choose'))
     keyboard.add(types.InlineKeyboardButton('Аэропорт от 40 000 THB', callback_data = f'exchange_{currency}_airport'))
     keyboard.add(types.InlineKeyboardButton('Банкомат от 10 000 THB', callback_data = f'exchange_{currency}_atm'))
     # keyboard.add(types.InlineKeyboardButton('Офис от 5 000 THB', callback_data = f'exchange_{currency}_office'))
@@ -177,4 +177,20 @@ def only_manager_keyboard():
 
     keyboard = types.InlineKeyboardMarkup()
     keyboard.add(types.InlineKeyboardButton('👨‍💻 Менеджер', url = f'https://t.me/{config.MANAGER_USERNAME}'))
+    return keyboard
+
+
+def only_back_keyboard():
+    keyboard = types.InlineKeyboardMarkup()
+    keyboard.add(types.InlineKeyboardButton('⬅️ Назад', callback_data = 'back_main'))
+    return keyboard
+
+
+def delivery_types_keyboard(currency):
+    keyboard = types.InlineKeyboardMarkup()
+    keyboard.add(types.InlineKeyboardButton('Пхукет от 40 000 THB', callback_data = f'exchange_{currency}_choose'))
+    keyboard.add(types.InlineKeyboardButton('📍 Ката от 20 000 THB', callback_data = f'exchange_{currency}_kata'))
+    keyboard.add(types.InlineKeyboardButton('📍 Равай/Найхарн  от 10 000 THB', callback_data = f'exchange_{currency}_ravai'))
+    keyboard.add(types.InlineKeyboardButton('🏠 Главное меню', callback_data = 'back_main'))
+    keyboard.add(types.InlineKeyboardButton('⬅️ Назад', callback_data = f'back_type_{currency}'))
     return keyboard

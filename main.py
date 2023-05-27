@@ -36,11 +36,13 @@ def start_message(message):
         bot.send_message(message.chat.id, 
                          text=functions.currency_rate_message(), 
                          parse_mode='Markdown',
+                         disable_notification=True,
                          )
         bot.send_message(message.chat.id, 
                     text=config.MAIN_MENU_MESSAGE, 
                     parse_mode='Markdown',
-                    reply_markup=keyboards.main_keyboard()
+                    reply_markup=keyboards.main_keyboard(),
+                    disable_notification=True,
                     )
     except:
         pass
@@ -64,6 +66,7 @@ def referral_message(message):
                              text=f'Реферал *{referral}* уже существует.',
                              parse_mode='Markdown',
                              reply_markup=keyboards.send_referral_keyboard(referral),
+                             disable_notification=True,
                              )
         
         # register new referral
@@ -72,6 +75,7 @@ def referral_message(message):
                              text=f'Зарезервировать *{referral}*?',
                              parse_mode='Markdown',
                              reply_markup=keyboards.reserve_referral_keyboard(referral),
+                             disable_notification=True,
                              )
 
     # referral format not valid
@@ -79,6 +83,7 @@ def referral_message(message):
         bot.send_message(chat_id=message.chat.id,
                         text=config.INCORRECT_REFERRAL_MESSAGE,
                         parse_mode='Markdown',
+                        disable_notification=True,
                         )
 
 
@@ -103,7 +108,8 @@ def exchange_message(message):
                 bot.send_message(chat_id=message.chat.id,
                                  text=f'Учесть для реферала *{referral}* обмен на сумму *{text_amount}* бат?',
                                  reply_markup=keyboards.confirm_exchange_keyboard(referral, amount),
-                                 parse_mode='Markdown'
+                                 parse_mode='Markdown',
+                                 disable_notification=True,
                                  )
             
             # no such referral
@@ -111,18 +117,21 @@ def exchange_message(message):
                 bot.send_message(chat_id=message.chat.id,
                                 text=config.NO_REFERRAL_MESSAGE,
                                 parse_mode='Markdown',
+                                disable_notification=True,
                                 )
         
         # wrong command format
         else:
             bot.send_message(chat_id=message.chat.id,
                                 text=config.WRONG_FORMAT_MESSAGE,
+                                disable_notification=True,
                                 )
     
     # no permissions
     else:
         bot.send_message(chat_id=message.chat.id,
                                 text=config.NO_PERMISSION_MESSAGE,
+                                disable_notification=True,
                                 )
 
 
@@ -141,6 +150,7 @@ def all_referrals_message(message):
                 bot.send_message(chat_id=message.chat.id,
                                  text=reply,
                                  parse_mode='Markdown',
+                                 disable_notification=True,
                                  )
             except:
                 logging.error(f'{inspect.currentframe().f_code.co_name}: Не удалось отправить сообщение по команде all.')
@@ -149,6 +159,7 @@ def all_referrals_message(message):
     else:
         bot.send_message(chat_id=message.chat.id,
                                 text=config.NO_PERMISSION_MESSAGE,
+                                disable_notification=True,
                                 )
 
 
@@ -165,12 +176,14 @@ def get_referrals_balance(message):
         bot.send_message(chat_id=message.chat.id,
                         text=f'На счету *{referral}* ({referral_info.identifier}) *{amount}* бат.',
                         parse_mode='Markdown',
+                        disable_notification=True,
                         )
     
     # no such referral
     else:
         bot.send_message(chat_id=message.chat.id,
                         text=config.WRONG_REFERRAL_MESSAGE,
+                        disable_notification=True,
                         )
 
 
@@ -183,12 +196,14 @@ def reduce_referrals_message(message):
         bot.send_message(chat_id=message.chat.id,
                          text=config.REDUCE_BALANCE_MESSAGE,
                          reply_markup=keyboards.confirm_reduce_all_keyboard(),
+                         disable_notification=True,
                          )
     
     # no permissions
     else:
         bot.send_message(chat_id=message.chat.id,
                         text=config.NO_PERMISSION_MESSAGE,
+                        disable_notification=True,
                         )
 
 
@@ -214,18 +229,21 @@ def reduce_referrals_message(message):
                             text=reply_text,
                             reply_markup=keyboards.confirm_reduce_keyboard(referral),
                             parse_mode='Markdown',
+                            disable_notification=True,
                             )
         
         # no such referral
         else:
             bot.send_message(chat_id=message.chat.id,
                         text=config.WRONG_REFERRAL_MESSAGE,
+                        disable_notification=True,
                         )
     
     # no permissions
     else:
         bot.send_message(chat_id=message.chat.id,
                         text=config.NO_PERMISSION_MESSAGE,
+                        disable_notification=True,
                         )
         
 
@@ -236,7 +254,8 @@ def menu_message(message):
     bot.send_message(message.chat.id, 
                     text=config.MAIN_MENU_MESSAGE, 
                     parse_mode='Markdown',
-                    reply_markup=keyboards.main_keyboard()
+                    reply_markup=keyboards.main_keyboard(),
+                    disable_notification=True,
                     )
     
 
@@ -248,6 +267,7 @@ def rate_message(message):
                     text=functions.currency_rate_message(), 
                     parse_mode='Markdown',
                     reply_markup=keyboards.menu_keyboard(),
+                    disable_notification=True,
                     )
 
 
@@ -305,6 +325,7 @@ def callback_query(call):
                             text=reply_text,
                             reply_markup=telebot.types.ForceReply(input_field_placeholder='Имя/название компании'),
                             parse_mode='Markdown',
+                            disable_notification=True,
                             )
         
         # if manager wants to register an exchange
@@ -372,6 +393,7 @@ def callback_query(call):
                     text=config.MAIN_MENU_MESSAGE, 
                     parse_mode='Markdown',
                     reply_markup=keyboards.main_keyboard(),
+                    disable_notification=True,
                     )
         
     elif query == 'exchanged':
@@ -387,6 +409,7 @@ def callback_query(call):
                     text=config.MAIN_MENU_MESSAGE, 
                     parse_mode='Markdown',
                     reply_markup=keyboards.main_keyboard(),
+                    disable_notification=True,
                     )
         
     elif query == 'sended':
@@ -399,6 +422,7 @@ def callback_query(call):
                     text=config.MAIN_MENU_MESSAGE, 
                     parse_mode='Markdown',
                     reply_markup=keyboards.main_keyboard(),
+                    disable_notification=True,
                     )
     
     elif query == 'recalculate':
@@ -494,7 +518,7 @@ def callback_query(call):
                                   )
         bot.edit_message_reply_markup(chat_id=chat_id,
                                           message_id=message_id,
-                                          reply_markup=keyboards.back_faq_keyboard(query),
+                                          reply_markup=keyboards.only_back_keyboard(),
                                           )
     
     elif query == 'bangkok':
@@ -566,22 +590,41 @@ def callback_query(call):
         
         elif len(call_data) == 3:
             exchange_type = call_data[2]
-
-            reply_text = f'''
-                        \nКнопка *{currency}*: введите сумму в *{currency}*, которую хотите обменять и я напишу, сколько *THB* Вы получите.\
-                        \n\
-                        \nКнопка *THB*: введите сумму в *THB*, которую хотите получить и я напишу, сколько *{currency}* Вам нужно обменять.\
-                        '''
-            bot.edit_message_text(chat_id=chat_id,
-                                  message_id=message_id,
-                                  text=reply_text,
-                                  parse_mode='Markdown',
-                                  )
-            bot.edit_message_reply_markup(chat_id=chat_id,
-                                          message_id=message_id,
-                                          reply_markup=keyboards.amount_currency_keyboard(currency, exchange_type),
-                                          )
             
+            if exchange_type != 'choose':
+                if exchange_type != 'service':
+                    reply_text = f'''
+                                \nКнопка *{currency}*: введите сумму в *{currency}*, которую хотите обменять и я напишу, сколько *THB* Вы получите.\
+                                \n\
+                                \nКнопка *THB*: введите сумму в *THB*, которую хотите получить и я напишу, сколько *{currency}* Вам нужно обменять.\
+                                '''
+                else:
+                    reply_text = f'''
+                                \nКнопка *{currency}*: введите сумму, которую хотите оплатить в *{currency}*.\
+                                \n\
+                                \nКнопка *THB*: введите сумму, которую хотите оплатить в *THB*.\
+                                '''
+                                
+                bot.edit_message_text(chat_id=chat_id,
+                                    message_id=message_id,
+                                    text=reply_text,
+                                    parse_mode='Markdown',
+                                    )
+                bot.edit_message_reply_markup(chat_id=chat_id,
+                                            message_id=message_id,
+                                            reply_markup=keyboards.amount_currency_keyboard(currency, exchange_type),
+                                            )
+            else:
+                bot.edit_message_text(chat_id=chat_id,
+                                    message_id=message_id,
+                                    text='Выберите подходящий район доставки:',
+                                    parse_mode='Markdown',
+                                    )
+                bot.edit_message_reply_markup(chat_id=chat_id,
+                                            message_id=message_id,
+                                            reply_markup=keyboards.delivery_types_keyboard(currency),
+                                            )
+
         elif len(call_data) == 4:
             exchange_type = call_data[2]
             amount_currency = call_data[3]
@@ -604,6 +647,7 @@ def callback_query(call):
                              text=reply_text,
                              reply_markup=telebot.types.ForceReply(input_field_placeholder=f'Сумма в {amount_currency}'),
                              parse_mode='Markdown',
+                             disable_notification=True,
                              )
             
     elif query == 'send':
@@ -624,6 +668,7 @@ def callback_query(call):
             
             bot.send_message(chat_id=config.MANAGER_ID,
                         text=reply_text,
+                        disable_notification=True,
                         )
         except:
             pass
@@ -667,7 +712,8 @@ def callback_query(call):
                 bot.send_message(chat_id=chat_id, 
                     text=config.MAIN_MENU_MESSAGE, 
                     parse_mode='Markdown',
-                    reply_markup=keyboards.main_keyboard()
+                    reply_markup=keyboards.main_keyboard(),
+                    disable_notification=True,
                     )
                 
             elif final_destination == 'atm':
@@ -675,6 +721,7 @@ def callback_query(call):
                                   text=config.ATM_MESSAGE,
                                   reply_markup=keyboards.atm_keyboard(final_destination),
                                   parse_mode='Markdown',
+                                  disable_notification=True,
                                   )
 
         elif destination == 'pairs':
@@ -791,6 +838,7 @@ def handle_text(message):
             bot.send_message(chat_id=message.chat.id,
                              text=reply_text,
                              parse_mode='Markdown',
+                             disable_notification=True,
                              )
             
             user_id = message.from_user.id
@@ -801,6 +849,7 @@ def handle_text(message):
             # send referral link
             bot.send_message(chat_id=message.chat.id,
                             text=f'Реферальная ссылка для {referral}: {config.BOT_LINK}?start={referral}',
+                            disable_notification=True,
                             )
 
             # send qr-code 
@@ -826,6 +875,7 @@ def handle_text(message):
                             text=reply_text,
                             reply_markup=telebot.types.ForceReply(input_field_placeholder='Имя/название компании'),
                             parse_mode='Markdown',
+                            disable_notification=True,
                             )
             
     elif (message.reply_to_message is not None) and\
@@ -894,6 +944,7 @@ def handle_text(message):
                                 text=reply_text,
                                 reply_markup=keyboards.exchanged_keyboard(currency, exchange_type),
                                 parse_mode='Markdown',
+                                disable_notification=True,
                                 )
 
             # entered amount less then minimal
@@ -920,6 +971,7 @@ def handle_text(message):
                                 text=reply_text,
                                 reply_markup=telebot.types.ForceReply(input_field_placeholder=f'Сумма в {amount_currency}'),
                                 parse_mode='Markdown',
+                                disable_notification=True,
                                 )
                 
         # user entered not a number  
@@ -944,8 +996,8 @@ def handle_text(message):
                              text=reply_text,
                              reply_markup=telebot.types.ForceReply(input_field_placeholder=f'Сумма в {amount_currency}'),
                              parse_mode='Markdown',
+                             disable_notification=True,
                              )
-
 
 @bot.message_handler(content_types=['document'])
 def handle_text(message):

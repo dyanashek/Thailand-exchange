@@ -29,5 +29,5 @@ except Exception as ex:
     logging.error('Referrals table already exists.')
 
 
-cursor.execute("DELETE FROM referrals WHERE id<>1000")
-database.commit()
+# cursor.execute("DELETE FROM referrals WHERE id<>1000")
+# database.commit()
