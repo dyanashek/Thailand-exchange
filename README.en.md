@@ -3,7 +3,7 @@
 ***
 A bilingual telegram bot for a currency exchanger that talks about the service and calculates real-time exchange rates based on Binance data. Added referral system.
 ## [DEMO](README.demo.md)
-## [LIVE](https://t.me/@Change_money_bot)
+## [LIVE](https://t.me/Change_money_bot)
 ## Functionality:
 1. Navigation menu to answer the most popular questions
 2. Notifications to the manager, if the user has left a request
