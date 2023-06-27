@@ -82,24 +82,22 @@ def main_keyboard(lang):
     if lang == 'rus':
         keyboard.add(types.InlineKeyboardButton('💸 Калькулятор обмена', callback_data = 'calculate_rus_main'))
         keyboard.add(types.InlineKeyboardButton('👨‍💻 Менеджер', url = f'https://t.me/{config.MANAGER_USERNAME}'))
-        reviews = types.InlineKeyboardButton('👍 Отзывы', callback_data = 'reviews_rus')
-        leave_review = types.InlineKeyboardButton('🖋 Оставить отзыв', url = config.TG_CHANNEL)
-        keyboard.add(reviews, leave_review)
         keyboard.add(types.InlineKeyboardButton('🏦 Перевод средств', callback_data = 'banks_rus'))
-        keyboard.add(types.InlineKeyboardButton('💥 Подробнее об услугах', callback_data = 'faq_rus')) # reviews, 
+        keyboard.add(types.InlineKeyboardButton('💥 Подробнее об услугах', callback_data = 'faq_rus'))
         keyboard.add(types.InlineKeyboardButton('💎 Специальные предложения', callback_data = 'service_rus'))
+        keyboard.add(types.InlineKeyboardButton('👍 Отзывы', callback_data = 'reviews_rus'))
+        keyboard.add(types.InlineKeyboardButton('🖋 Оставить отзыв', url = config.TG_CHANNEL))
         keyboard.add(types.InlineKeyboardButton('📸 Наш Instagram', url = config.INSTAGRAM))
         keyboard.add(types.InlineKeyboardButton('🔁 Change language', callback_data = 'language_change'))
 
     else:
         keyboard.add(types.InlineKeyboardButton('💸 Exchange calculator', callback_data = 'calculate_eng_main'))
         keyboard.add(types.InlineKeyboardButton('👨‍💻 Manager', url = f'https://t.me/{config.MANAGER_USERNAME}'))
-        reviews = types.InlineKeyboardButton('👍 Reviews', callback_data = 'reviews_eng')
-        leave_review = types.InlineKeyboardButton('🖋 Leave feedback', url = config.TG_CHANNEL)
-        keyboard.add(reviews, leave_review)
         keyboard.add(types.InlineKeyboardButton('🏦 Money transaction', callback_data = 'banks_eng'))
         keyboard.add(types.InlineKeyboardButton('💥 More about services', callback_data = 'faq_eng'))
         keyboard.add(types.InlineKeyboardButton('💎 Special offers', callback_data = 'service_eng'))
+        keyboard.add(types.InlineKeyboardButton('👍 Reviews', callback_data = 'reviews_eng'))
+        keyboard.add(types.InlineKeyboardButton('🖋 Leave feedback', url = config.TG_CHANNEL))
         keyboard.add(types.InlineKeyboardButton('📸 Our Instagram', url = config.INSTAGRAM))
         keyboard.add(types.InlineKeyboardButton('🔁 Изменить язык', callback_data = 'language_change'))
 
