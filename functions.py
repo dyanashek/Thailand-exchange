@@ -430,43 +430,110 @@ def set_specific_exchange_rate():
 
         time.sleep(60)
 
-def currency_rate_message():
+def currency_rate_message(language):
     """Generates a message with currency rates and terms of use."""
 
     current_date = (datetime.datetime.utcnow() + datetime.timedelta(hours=7)).strftime("%d.%m.%Y")
 
-    text = f'''
-        \n*Курс на {current_date}* 🗓\
-        \n\
-        \n💱 *THB/RUB*:\
-        \nКурьерская доставка - *{rates.RUB_DELIVERY_RATE}*\
-        \nДоставка в аэропорт - *{rates.RUB_AIRPORT_RATE}*\
-        \nВыдача через банкомат - *{rates.RUB_ATM_RATE}*\
-        \nПеревод на тайский счет - *{rates.RUB_TRANSFER_RATE}*\
-        \nОплата услуг - *{rates.RUB_TRANSFER_RATE}*\
-        \n\
-        \n💰 *USDT/THB*:\
-        \nКурьерская доставка - *{rates.USDT_DELIVERY_RATE}*\
-        \nДоставка в аэропорт - *{rates.USDT_AIRPORT_RATE}*\
-        \nВыдача через банкомат - *{rates.USDT_ATM_RATE}*\
-        \nПеревод на тайский счет - *{rates.USDT_TRANSFER_RATE}*\
-        \nОплата услуг - *{rates.USDT_TRANSFER_RATE}*\
-        \n\
-        \n*Минимальная сумма выдачи*:\
-        \nКурьерская доставка от *40 000 THB*:\
-        \n- для *района Ката* от *20 000 THB*\
-        \n- для *районов Равай и Найхарн* от *10 000 THB*\
-        \n\
-        \nВ аэропорт от *40 000 THB*\
-        \nЧерез банкомат от *10 000 THB*\
-        \nНа тайский счет от *5 000 THB*\
-        \nОплата услуг от *5 000 THB*\
-        \n\
-        \n❗️*ВАЖНО*❗️\
-        \nВ сообщении представлены справочные данные. Курс меняется в режиме реального времени и может отличаться в зависимости от суммы обмена. Для более точного расчета воспользуйтесь *калькулятором обмена*.\
-    '''
+    if language == 'rus':
+        text = f'''
+            \n*Курс на {current_date}* 🗓\
+            \n\
+            \n💱 *THB/RUB*:\
+            \nКурьерская доставка - *{rates.RUB_DELIVERY_RATE}*\
+            \nДоставка в аэропорт - *{rates.RUB_AIRPORT_RATE}*\
+            \nВыдача через банкомат - *{rates.RUB_ATM_RATE}*\
+            \nПеревод на тайский счет - *{rates.RUB_TRANSFER_RATE}*\
+            \nОплата услуг - *{rates.RUB_TRANSFER_RATE}*\
+            \n\
+            \n💰 *USDT/THB*:\
+            \nКурьерская доставка - *{rates.USDT_DELIVERY_RATE}*\
+            \nДоставка в аэропорт - *{rates.USDT_AIRPORT_RATE}*\
+            \nВыдача через банкомат - *{rates.USDT_ATM_RATE}*\
+            \nПеревод на тайский счет - *{rates.USDT_TRANSFER_RATE}*\
+            \nОплата услуг - *{rates.USDT_TRANSFER_RATE}*\
+            \n\
+            \n*Минимальная сумма выдачи*:\
+            \nКурьерская доставка от *40 000 THB*:\
+            \n- для *района Ката* от *20 000 THB*\
+            \n- для *районов Равай и Найхарн* от *10 000 THB*\
+            \n\
+            \nВ аэропорт от *40 000 THB*\
+            \nЧерез банкомат от *10 000 THB*\
+            \nНа тайский счет от *5 000 THB*\
+            \nОплата услуг от *5 000 THB*\
+            \n\
+            \n❗️*ВАЖНО*❗️\
+            \nВ сообщении представлены справочные данные. Курс меняется в режиме реального времени и может отличаться в зависимости от суммы обмена. Для более точного расчета воспользуйтесь *калькулятором обмена*.\
+        '''
+    else:
+        text = f'''
+            \n*Course to {current_date}* 🗓\
+            \n\
+            \n💱 *THB/RUB*:\
+            \nCourier delivery - *{rates.RUB_DELIVERY_RATE}*\
+            \nAirport delivery - *{rates.RUB_AIRPORT_RATE}*\
+            \nWithdrawal via ATM - *{rates.RUB_ATM_RATE}*\
+            \nTransfer to Thai account - *{rates.RUB_TRANSFER_RATE}*\
+            \nPayment for services - *{rates.RUB_TRANSFER_RATE}*\
+            \n\
+            \n💰 *USDT/THB*:\
+            \nCourier delivery - *{rates.USDT_DELIVERY_RATE}*\
+            \nAirport Delivery - *{rates.USDT_AIRPORT_RATE}*\
+            \nATM withdrawal - *{rates.USDT_ATM_RATE}*\
+            \nTransfer to Thai account - *{rates.USDT_TRANSFER_RATE}*\
+            \nPayment for services - *{rates.USDT_TRANSFER_RATE}*\
+            \n\
+            \n*Minimum withdrawal amount*:\
+            \nCourier delivery from *40 000 THB*:\
+            \n- for *Kata area* from *20 000 THB*\
+            \n- for *Rawai and Naiharn districts* from *10,000 THB*\
+            \n\
+            \nTo the airport from *40 000 THB*\
+            \nVia ATM from *10 000 THB*\
+            \nTo Thai account from *5 000 THB*\
+            \nPayment for services from *5 000 THB*\
+            \n\
+            \n❗️*IMPORTANT*❗️\
+            \nThe message contains reference data. The rate changes in real time and may differ depending on the amount of the exchange. For a more accurate calculation, use the *exchange calculator*.\
+        '''
 
     return text
+
+
+def set_language(user_id, language):
+    """Sets users language."""
+
+    database = sqlite3.connect("exchange.db")
+    cursor = database.cursor()
+
+    cursor.execute(f'''UPDATE users
+                    SET language="{language}"
+                    WHERE user_id="{user_id}"
+                    ''')
+
+    database.commit()
+    cursor.close()
+    database.close()
+
+
+def get_language(user_id):
+    '''Gets users language.'''
+
+    database = sqlite3.connect("exchange.db")
+    cursor = database.cursor()
+
+    language = cursor.execute(f"SELECT language FROM users WHERE user_id='{user_id}'").fetchall()
+
+    cursor.close()
+    database.close()
+
+    if language:
+        language = language[0][0]
+    else:
+        language = 'rus'
+    
+    return language
 
 # \nПолучение в офисе - *{rates.RUB_OFFICE_RATE}*\
 

@@ -15,10 +15,14 @@ def extract_referral(text, command):
     return referral
 
 
-def extract_referral_from_message(text):
+def extract_referral_from_message(text, language):
     """Extracts referral from text."""
 
-    regex = r'(?<=реферала )[a-zA-Z0-9]+'
+    if language == 'rus':
+        regex = r'(?<=реферала )[a-zA-Z0-9]+'
+    else:
+        regex = r'(?<=To reserve a referral )[a-zA-Z0-9]+'
+
     referral = re.search(regex, text).group()
 
     return referral
@@ -48,17 +52,29 @@ def numbers_format(value):
     return '{:,}'.format(value).replace(',', ' ')
 
 
-def extract_exchange_info(text):
+def extract_exchange_info(text, language):
     """Extract exchange information from reply text."""
 
-    regex = r'(?<=Пара: )[A-Z]+'
+    if language == 'rus':
+        regex = r'(?<=Пара: )[A-Z]+'
+    else:
+        regex = r'(?<=Pair: )[A-Z]+'
     currency = re.search(regex, text).group()
 
-    regex = r'(?<=сумму в )[A-Z]+'
+    if language == 'rus':
+        regex = r'(?<=сумму в )[A-Z]+'
+    else:
+        regex = r'(?<=amount in )[A-Z]+'
+
     amount_currency = re.search(regex, text).group()
 
+    if language == 'rus':
+        delivery_types = config.TYPE_RUSSIAN.items()
+    else:
+        delivery_types = config.TYPE_ENGLISH.items()
+
     exchange_type = ''
-    for key, value in config.TYPE_RUSSIAN.items():
+    for key, value in delivery_types:
         if value in text:
             exchange_type = key
             break
