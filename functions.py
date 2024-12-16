@@ -5,11 +5,18 @@ import qrcode
 import requests
 import time
 import datetime
+import telebot
 
 import utils
 import classes
 import config
+import db_functions
+import keyboards
 import rates
+
+
+bot = telebot.TeleBot(config.TELEGRAM_TOKEN)
+
 
 def check_is_new_user(user_id):
     """Checks if user already in database. Returns True if he is a new user, False if not."""
@@ -40,14 +47,14 @@ def add_user(user_id, user_username, referral=''):
     if referral == '':
         cursor.execute(f'''
             INSERT INTO users (user_id, user_username)
-            VALUES ("{user_id}", "{user_username}")
-            ''')
+            VALUES (?, ?)
+            ''', (user_id, user_username,))
 
     else:
         cursor.execute(f'''
             INSERT INTO users (user_id, user_username, referral)
-            VALUES ("{user_id}", "{user_username}", "{referral}")
-            ''')
+            VALUES (?, ?, ?)
+            ''', (user_id, user_username, referral,))
         
     database.commit()
     cursor.close()
@@ -103,7 +110,7 @@ def get_referral(referral):
     database = sqlite3.connect("exchange.db")
     cursor = database.cursor()
 
-    referral = cursor.execute(f'''SELECT identifier, referral, amount
+    referral = cursor.execute(f'''SELECT identifier, referral, amount, percent
                                     FROM referrals 
                                     WHERE referral="{referral}"
                                     ''').fetchall()
@@ -112,6 +119,7 @@ def get_referral(referral):
         referral = classes.Referral(referral[0][0],
                                     referral[0][1],
                                     referral[0][2],
+                                    referral[0][3],
                                     )
         
     return referral
@@ -161,8 +169,8 @@ def add_referral(identifier, referral):
     cursor = database.cursor()
 
     cursor.execute(f'''
-        INSERT INTO referrals (identifier, referral)
-        VALUES ("{identifier}", "{referral}")
+        INSERT INTO referrals (identifier, referral, percent)
+        VALUES ("{identifier}", "{referral}", {config.REFERRAL_COEFF})
         ''')
     
     database.commit()
@@ -233,7 +241,7 @@ def construct_all_referrals_message(referrals):
 
     for num, referral in enumerate(referrals):
         amount = utils.numbers_format(referral[3])
-        reply_text += f'{num + 1}. У *{referral[2]}* ({referral[1]}) на счету *{amount}* бат.\n'
+        reply_text += f'{num + 1}. У *{referral[2]}* ({utils.escape_markdown(referral[1])}) на счету *{amount}* бат, бонус *{int(referral[4] * 100)}%*.\n'
         count += 1
 
         if count == 50 or count == len(referrals):
@@ -274,6 +282,81 @@ def reduce_referral_balance(referral):
     logging.info(f'{inspect.currentframe().f_code.co_name}: Счета реферала {referral} обнулены.')
 
 
+# def p2p_binance(currency = 'THB', amount = ''):
+#     """Gets price of buying or selling usdt on Binance p2p."""
+
+#     # indicate trade side
+#     side = '1'
+#     if currency == 'THB':
+#         side = '0'
+    
+#     pay_types = []
+#     if currency == 'RUB':
+#         pay_types = ['64', '75', '14']
+#     elif currency == 'THB':
+#         pay_types = ['14']
+
+#     # construct params
+#     data_binance = {
+#         "tokenId": config.COIN,
+#         "currencyId": currency,
+#         "authMaker" : "true",
+#         "side": side,
+#         "amount": amount,
+#         "payment" : pay_types,
+#         "userId" : "",
+#     }
+#     # make a request
+#     try:
+#         deals = requests.post(url=config.URL_BINANCE, data=data_binance, headers=config.HEADERS).json().get('result').get('items')
+#     except:
+#         deals = None
+    
+#     if deals is not None:
+
+#         for deal in deals:
+#             # extract merchants order count and rate
+#             order_count = int(deal.get('recentOrderNum'))
+#             finish_rate = float(deal.get('recentExecuteRate'))
+
+#             # extract price if the merchant fits params
+#             if order_count >= config.ORDERS and finish_rate >= config.ORDERS_RATE:
+#                 price = float(deal.get('price'))
+
+#                 return price
+    
+#     return None
+
+def get_rub_price():
+    data_bybit = {
+        'tokenId': 'USDT', 
+        'currencyId': 'RUB', 
+        'payment': ['581',],
+        'amount' : '',
+        'side' : '1',
+        # 'authMaker' : 'true',
+    }
+
+    headers = {
+        'User-Agent' : 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
+        'origin' : 'https://www.bybit.com'
+    }
+
+    try:
+        deals = requests.post(url='https://api2.bybit.com/fiat/otc/item/online', data=data_bybit, headers=headers).json().get('result').get('items')
+    except:
+        return 'Ошибка соединения'
+    
+    if deals is None:
+        return 'Ошибка соединения'
+    
+    for deal in deals:
+        order_count = int(deal.get('recentOrderNum'))
+        finish_rate = float(deal.get('recentExecuteRate'))
+        if order_count >= 50 and finish_rate >= 0.96:
+            return float(deal.get('price'))
+
+
 def p2p_binance(currency = 'THB', amount = ''):
     """Gets price of buying or selling usdt on Binance p2p."""
 
@@ -283,8 +366,8 @@ def p2p_binance(currency = 'THB', amount = ''):
         side = 'SELL'
     
     pay_types = []
-    if currency == 'RUB':
-        pay_types = config.BANKS
+    if currency == 'THB':
+        pay_types = ["BANK"]
 
     # construct params
     data_binance = {
@@ -293,7 +376,7 @@ def p2p_binance(currency = 'THB', amount = ''):
         "fiat": currency,
         "page": 1,
         "proMerchantAds": False,
-        "publisherType": None,
+        "publisherType": "merchant",
         "rows": 20,
         "tradeType": side,
         "transAmount": amount,
@@ -318,14 +401,15 @@ def p2p_binance(currency = 'THB', amount = ''):
                 price = float(deal.get('adv').get('price'))
 
                 return price
-            
+
+
 def get_basic_exchange_rate(currency):
     """Gets minimal rate for currency pair."""
 
     thb_price = p2p_binance()
 
     if currency == 'RUB':
-        rub_price = p2p_binance(currency)
+        rub_price = get_rub_price()
         rate = round(rub_price / thb_price, 3)
 
     elif currency == 'USD':
@@ -360,44 +444,47 @@ def get_exchange_rate(currency, delivery_type, amount_currency='THB', amount='')
     
     coeff = config.TYPE_COEFF[delivery_type]
 
-    if amount_currency == 'THB':
-        thb_price = p2p_binance(amount=amount)
+    try:
+        if amount_currency == 'THB':
+            # amount = 40000
+            thb_price = p2p_binance(amount=amount)
+            if currency == 'RUB':
+                rub_amount = round(amount * config.BASIC_RUB, 2)
+                rub_price = get_rub_price()
 
-        if currency == 'RUB':
-            rub_amount = round(amount * config.BASIC_RUB, 2)
-            rub_price = p2p_binance(currency='RUB', amount=rub_amount)
+                rate = round(rub_price / thb_price * coeff, 3) 
+            
+            elif currency == 'USD':
+                usd_amount = round(amount / config.BASIC_USD, 2)
+                usd_price = p2p_binance(currency='USD', amount=usd_amount)
 
-            rate = round(rub_price / thb_price * coeff, 3) 
+                rate = round(thb_price / usd_price / coeff, 3) 
+            
+            elif currency == 'USDT':
+                rate = round(thb_price / coeff, 3) 
         
-        elif currency == 'USD':
-            usd_amount = round(amount / config.BASIC_USD, 2)
-            usd_price = p2p_binance(currency='USD', amount=usd_amount)
+        else:
+            if currency == 'RUB':
+                rub_price = get_rub_price()
+                thb_amount = round(amount / config.BASIC_RUB, 2)
+                thb_price = p2p_binance(amount=thb_amount)
 
-            rate = round(thb_price / usd_price / coeff, 3) 
-        
-        elif currency == 'USDT':
-            rate = round(thb_price / coeff, 3) 
-    
-    else:
-        if currency == 'RUB':
-            rub_price = p2p_binance(currency='RUB', amount=amount)
-            thb_amount = round(amount / config.BASIC_RUB, 2)
-            thb_price = p2p_binance(amount=thb_amount)
+                rate = round(rub_price / thb_price * coeff, 3) 
+            
+            elif currency == 'USD':
+                usd_price = p2p_binance(currency='USD', amount=amount)
+                thb_amount = round(amount * config.BASIC_USD, 2)
+                thb_price = p2p_binance(amount=thb_amount)
 
-            rate = round(rub_price / thb_price * coeff, 3) 
-        
-        elif currency == 'USD':
-            usd_price = p2p_binance(currency='USD', amount=amount)
-            thb_amount = round(amount * config.BASIC_USD, 2)
-            thb_price = p2p_binance(amount=thb_amount)
+                rate = round(thb_price / usd_price / coeff, 3) 
 
-            rate = round(thb_price / usd_price / coeff, 3) 
-
-        elif currency == 'USDT':
-            thb_amount = round(amount * config.BASIC_USDT, 2)
-            thb_price = p2p_binance(amount=thb_amount)
-
-            rate = round(thb_price / coeff, 3) 
+            elif currency == 'USDT':
+                thb_amount = round(amount * config.BASIC_USDT, 2)
+                thb_price = p2p_binance(amount=thb_amount)
+                
+                rate = round(thb_price / coeff, 3) 
+    except:
+        rate = None
 
     return rate
 
@@ -430,6 +517,7 @@ def set_specific_exchange_rate():
 
         time.sleep(60)
 
+
 def currency_rate_message(language):
     """Generates a message with currency rates and terms of use."""
 
@@ -440,62 +528,49 @@ def currency_rate_message(language):
             \n*Курс на {current_date}* 🗓\
             \n\
             \n💱 *THB/RUB*:\
-            \nКурьерская доставка - *{rates.RUB_DELIVERY_RATE}*\
-            \nДоставка в аэропорт - *{rates.RUB_AIRPORT_RATE}*\
             \nВыдача через банкомат - *{rates.RUB_ATM_RATE}*\
-            \nПеревод на тайский счет - *{rates.RUB_TRANSFER_RATE}*\
             \nОплата услуг - *{rates.RUB_TRANSFER_RATE}*\
+            \nПеревод на тайский счет - *{rates.RUB_TRANSFER_RATE}*\
+            \nКурьерская доставка (500 THB) - *{rates.RUB_DELIVERY_RATE}*\
             \n\
             \n💰 *USDT/THB*:\
-            \nКурьерская доставка - *{rates.USDT_DELIVERY_RATE}*\
-            \nДоставка в аэропорт - *{rates.USDT_AIRPORT_RATE}*\
             \nВыдача через банкомат - *{rates.USDT_ATM_RATE}*\
-            \nПеревод на тайский счет - *{rates.USDT_TRANSFER_RATE}*\
             \nОплата услуг - *{rates.USDT_TRANSFER_RATE}*\
+            \nПеревод на тайский счет - *{rates.USDT_TRANSFER_RATE}*\
+            \nКурьерская доставка (500 THB) - *{rates.USDT_DELIVERY_RATE}*\
             \n\
             \n*Минимальная сумма выдачи*:\
-            \nКурьерская доставка от *40 000 THB*:\
-            \n- для *района Ката* от *20 000 THB*\
-            \n- для *районов Равай и Найхарн* от *10 000 THB*\
-            \n\
-            \nВ аэропорт от *40 000 THB*\
-            \nЧерез банкомат от *10 000 THB*\
-            \nНа тайский счет от *5 000 THB*\
-            \nОплата услуг от *5 000 THB*\
+            \nЧерез банкомат от *1 000 THB*\
+            \nНа тайский счет от *1 000 THB*\
+            \nОплата услуг от *1 000 THB*\
+            \nСтоимость курьерской доставки *500 THB*\
             \n\
             \n❗️*ВАЖНО*❗️\
-            \nВ сообщении представлены справочные данные. Курс меняется в режиме реального времени и может отличаться в зависимости от суммы обмена. Для более точного расчета воспользуйтесь *калькулятором обмена*.\
+            \nВ сообщении представлены справочные данные. Курс меняется в режиме реального времени и может отличаться в зависимости от суммы обмена. Для более точного расчета воспользуйтесь кнопкой *обмен валюты* в меню.\
         '''
     else:
         text = f'''
             \n*Course to {current_date}* 🗓\
             \n\
             \n💱 *THB/RUB*:\
-            \nCourier delivery - *{rates.RUB_DELIVERY_RATE}*\
-            \nAirport delivery - *{rates.RUB_AIRPORT_RATE}*\
             \nWithdrawal via ATM - *{rates.RUB_ATM_RATE}*\
             \nTransfer to Thai account - *{rates.RUB_TRANSFER_RATE}*\
             \nPayment for services - *{rates.RUB_TRANSFER_RATE}*\
+            \nCourier delivery (500 THB) - *{rates.RUB_DELIVERY_RATE}*\
             \n\
             \n💰 *USDT/THB*:\
-            \nCourier delivery - *{rates.USDT_DELIVERY_RATE}*\
-            \nAirport Delivery - *{rates.USDT_AIRPORT_RATE}*\
             \nATM withdrawal - *{rates.USDT_ATM_RATE}*\
             \nTransfer to Thai account - *{rates.USDT_TRANSFER_RATE}*\
             \nPayment for services - *{rates.USDT_TRANSFER_RATE}*\
+            \nCourier delivery (500 THB)- *{rates.USDT_DELIVERY_RATE}*\
             \n\
             \n*Minimum withdrawal amount*:\
-            \nCourier delivery from *40 000 THB*:\
-            \n- for *Kata area* from *20 000 THB*\
-            \n- for *Rawai and Naiharn districts* from *10,000 THB*\
-            \n\
-            \nTo the airport from *40 000 THB*\
-            \nVia ATM from *10 000 THB*\
-            \nTo Thai account from *5 000 THB*\
-            \nPayment for services from *5 000 THB*\
+            \nVia ATM from *1 000 THB*\
+            \nTo Thai account from *1 000 THB*\
+            \nPayment for services from *1 000 THB*\
             \n\
             \n❗️*IMPORTANT*❗️\
-            \nThe message contains reference data. The rate changes in real time and may differ depending on the amount of the exchange. For a more accurate calculation, use the *exchange calculator*.\
+            \nThe message contains reference data. The rate changes in real time and may differ depending on the amount of the exchange. For a more accurate calculation, use the *currency exchange* button in menu.\
         '''
 
     return text
@@ -534,6 +609,102 @@ def get_language(user_id):
         language = 'rus'
     
     return language
+
+
+def currency_rate_notification(language):
+    """Generates a message with currency rates and terms of use."""
+
+    current_date = (datetime.datetime.utcnow() + datetime.timedelta(hours=7)).strftime("%d.%m.%Y")
+
+    if language == 'rus':
+        text = f'''
+            \n*Курс на {current_date}* 🗓\
+            \n\
+            \n💱 *THB/RUB*:\
+            \nКурьерская доставка - *{rates.RUB_DELIVERY_RATE}*\
+            \nВыдача через банкомат - *{rates.RUB_ATM_RATE}*\
+            \nПеревод на тайский счет - *{rates.RUB_TRANSFER_RATE}*\
+            \n\
+            \n💰 *USDT/THB*:\
+            \nКурьерская доставка - *{rates.USDT_DELIVERY_RATE}*\
+            \nВыдача через банкомат - *{rates.USDT_ATM_RATE}*\
+            \nПеревод на тайский счет - *{rates.USDT_TRANSFER_RATE}*\
+            \n\
+            \n❗️*ВАЖНО*❗️\
+            \nВ сообщении представлены справочные данные. Курс меняется в режиме реального времени и может отличаться в зависимости от суммы обмена. Для более точного расчета воспользуйтесь кнопкой *обмен валюты* в меню.\
+        '''
+    else:
+        text = f'''
+            \n*Course to {current_date}* 🗓\
+            \n\
+            \n💱 *THB/RUB*:\
+            \nCourier delivery - *{rates.RUB_DELIVERY_RATE}*\
+            \nWithdrawal via ATM - *{rates.RUB_ATM_RATE}*\
+            \nTransfer to Thai account - *{rates.RUB_TRANSFER_RATE}*\
+            \n\
+            \n💰 *USDT/THB*:\
+            \nCourier delivery - *{rates.USDT_DELIVERY_RATE}*\
+            \nATM withdrawal - *{rates.USDT_ATM_RATE}*\
+            \nTransfer to Thai account - *{rates.USDT_TRANSFER_RATE}*\
+            \n\
+            \n❗️*IMPORTANT*❗️\
+            \nThe message contains reference data. The rate changes in real time and may differ depending on the amount of the exchange. For a more accurate calculation, use the *currency exchange* button in main menu.\
+        '''
+
+    return text
+
+def daily_notify():
+    while True:
+        current_time = (datetime.datetime.utcnow() + datetime.timedelta(hours=7)).strftime("%H:%M")
+
+        if current_time == '11:00':
+            users_info = db_functions.select_all_user_ids()
+
+            for user_info in users_info:
+                try:
+                    bot.send_message(chat_id=user_info[0],
+                                     text=currency_rate_notification(user_info[1]),
+                                     reply_markup=keyboards.menu_keyboard(user_info[1]),
+                                     parse_mode='Markdown',
+                                     disable_notification=False,
+                                     )
+                except:
+                    pass
+            
+            time.sleep(86250)
+
+def send_marketing_message(text, content_type, media_id=None):
+    users_ids = db_functions.select_all_user_ids()
+
+    for user_id in users_ids:
+        if content_type == 'text':
+            try:
+                bot.send_message(chat_id=user_id[0],
+                                 text=text,
+                                 disable_notification=False,
+                                 )
+            except:
+                pass
+
+        elif content_type == 'photo':
+            try:
+                bot.send_photo(chat_id=user_id,
+                               caption=text,
+                               photo=media_id,
+                               disable_notification=False,
+                               )
+            except:
+                pass
+
+        elif content_type == 'video':
+            try:
+                bot.send_video(chat_id=user_id,
+                               caption=text,
+                               video=media_id,
+                               disable_notification=False,
+                               )
+            except:
+                pass
 
 # \nПолучение в офисе - *{rates.RUB_OFFICE_RATE}*\
 

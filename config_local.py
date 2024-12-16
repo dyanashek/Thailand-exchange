@@ -1,0 +1,5 @@
+MANAGER_ID = ['877069241',]
+MANAGER_USERNAME = 'dyanashek'
+DIRECTOR_ID = '877069241'
+BOT_LINK = 'https://t.me/EVAexchange_bot'
+BOT_ID = '7585049275'

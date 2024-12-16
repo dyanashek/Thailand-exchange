@@ -89,3 +89,22 @@ def convert_to_float(text):
         amount = False
     
     return amount
+
+def escape_markdown(text):
+    characters_to_escape = ['_', '*', '[', ']', '`']
+    for char in characters_to_escape:
+        text = text.replace(char, '\\' + char)
+
+    return text
+
+
+def validate_bonus(bonus):
+    bonus = bonus.replace(',', '.')
+    try:
+        bonus = round(float(bonus), 2)
+        if bonus < 1 and bonus > 0:
+            return bonus
+        else:
+            return False
+    except:
+        return False
