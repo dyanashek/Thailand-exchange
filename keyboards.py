@@ -247,7 +247,7 @@ def exchange_type_keyboard(currency, lang):
 
     if lang == 'rus':
         keyboard.add(types.InlineKeyboardButton('Банкомат от 1 000 THB', callback_data = f'exchange_rus_{currency}_atm_THB'))
-        keyboard.add(types.InlineKeyboardButton('Курьер (500 THB - доставка)', callback_data = f'exchange_rus_{currency}_choose'))
+        keyboard.add(types.InlineKeyboardButton('Курьер (доставка - 500 THB)', callback_data = f'exchange_rus_{currency}_choose'))
         keyboard.add(types.InlineKeyboardButton('На тайский счет от 1 000 THB', callback_data = f'exchange_rus_{currency}_transfer'))
         keyboard.add(types.InlineKeyboardButton('Оплата услуг от 1 000 THB', callback_data = f'exchange_rus_{currency}_service'))
         # keyboard.add(types.InlineKeyboardButton('Аэропорт от 40 000 THB', callback_data = f'exchange_rus_{currency}_airport'))
@@ -257,7 +257,7 @@ def exchange_type_keyboard(currency, lang):
 
     else:
         keyboard.add(types.InlineKeyboardButton('ATM from 1 000 THB', callback_data = f'exchange_eng_{currency}_atm_THB'))
-        keyboard.add(types.InlineKeyboardButton('Courier (500 THB - delivery)', callback_data = f'exchange_eng_{currency}_choose'))
+        keyboard.add(types.InlineKeyboardButton('Courier (delivery- 500 THB)', callback_data = f'exchange_eng_{currency}_choose'))
         keyboard.add(types.InlineKeyboardButton('Thai account from 1 000 THB', callback_data = f'exchange_eng_{currency}_transfer'))
         keyboard.add(types.InlineKeyboardButton('Services from 1 000 THB', callback_data = f'exchange_eng_{currency}_service'))
         # keyboard.add(types.InlineKeyboardButton('Airport from 1 000 THB', callback_data = f'exchange_eng_{currency}_airport'))
